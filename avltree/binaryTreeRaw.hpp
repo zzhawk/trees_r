@@ -22,20 +22,35 @@ protected:
 
 public:
 
+	explicit binaryTree() {}
+
 	explicit binaryTree(T val) {
 		_root = new node(val);
 	}
 
-	virtual ~binaryTree()
-	{
+	virtual ~binaryTree(){
 		destoryTree(_root);
 	}
 
-	binaryTree(const binaryTree&) = delete;
-	binaryTree(binaryTree&&) noexcept = delete;
+	binaryTree(const binaryTree& tar) {
+		copyTree(&_root, tar._root);
+	}
 
-	binaryTree& operator = (const binaryTree&) = delete;
-	binaryTree& operator = (binaryTree&&) noexcept = delete;
+	binaryTree(binaryTree&& tar) noexcept {
+		_root = tar._root;
+		tar._root = nullptr;
+	};
+
+	binaryTree& operator = (const binaryTree& tar) {
+		copyTree(&_root, tar._root);
+		return *this;
+	};
+
+	binaryTree& operator = (binaryTree&& tar) noexcept {
+		_root = tar._root;
+		tar._root = nullptr;
+		return *this;
+	};
 
 	virtual void append(T val) {
 		if (val < _root->pt) appendNode(val, &_root->left);
@@ -114,6 +129,19 @@ protected:
 		else appendNode(val, &(*root)->right);
 	}
 
+	node* copyTree(node** root, node* tar) {
+		if (tar == nullptr) {
+			return nullptr;
+		}
+		else {
+			*root = new node(tar->pt);
+			(*root)->left = copyTree(&(*root)->left, tar->left);
+			(*root)->right = copyTree(&(*root)->right, tar->right);
+		}
+
+		return *root;
+	}
+
 	void delelteNode(node** nd, node** from) {
 
 		if (((*nd)->left == nullptr) && ((*nd)->right == nullptr)) {
@@ -151,13 +179,29 @@ class avl : public binaryTree<T> {
 public:
 	typedef binaryTree<T>::node bTreeNode;
 
+	explicit avl() {}
+
 	explicit avl(T val) : binaryTree<T>::binaryTree(val) {}
 
-	avl(const avl&) = delete;
-	avl(avl&&) noexcept = delete;
+	avl(const avl& tar) {
+		this->copyTree(&this->_root, tar._root);
+	}
 
-	avl& operator = (const avl&) = delete;
-	avl& operator = (avl&&) noexcept = delete;
+	avl(avl&& tar) noexcept {
+		this->_root = tar._root;
+		tar._root = nullptr;
+	};
+
+	avl& operator = (const avl& tar) {
+		this->copyTree(&this->_root, tar._root);
+		return *this;
+	};
+
+	avl& operator = (avl&& tar) noexcept {
+		this->_root = tar._root;
+		tar._root = nullptr;
+		return *this;
+	};
 
 	void append(T val) override {
 		start = nullptr;
